@@ -8,6 +8,7 @@ import {
   ArrowLeft, Calculator, Microscope, BookOpen,
   Globe, Laptop, Atom, FlaskConical,
   Feather, Landmark, BookText, Info, CalendarOff,
+  Clock, CheckCircle,
 } from "lucide-react";
 import { motion, type Variants } from "framer-motion";
 import { useSchedule, getExamLink, type ExamSubject } from "../../hooks/useExams";
@@ -34,12 +35,13 @@ function fmt(iso: string) {
   });
 }
 
-function statusOf(s: ExamSubject, now: Date): "upcoming" | "open" | "closed" {
+
+function statusOf(s: ExamSubject, now: Date): "pending" | "ongoing" | "done" {
   const start = new Date(s.start);
   const end = new Date(s.end);
-  if (now < start) return "upcoming";
-  if (now > end) return "closed";
-  return "open";
+  if (now < start) return "pending";
+  if (now > end) return "done";
+  return "ongoing";
 }
 
 export default function GradePage() {
@@ -168,26 +170,27 @@ export default function GradePage() {
                             {fmt(s.start)} – {fmt(s.end)}
                           </p>
                         </div>
-
-                        {status === "open" && (
-                          <Button
-                            onClick={() => handleStart(s.subject)}
-                            disabled={busy === s.subject}
-                            className="w-full bg-slate-900 hover:bg-blue-600 text-white shadow-none rounded-lg font-semibold transition-colors duration-300"
-                          >
-                            {busy === s.subject ? "Opening…" : "Start Examination"}
-                          </Button>
-                        )}
-                        {status === "upcoming" && (
-                          <Button disabled className="w-full rounded-lg font-semibold" variant="outline">
-                            Not yet available
-                          </Button>
-                        )}
-                        {status === "closed" && (
-                          <Button disabled className="w-full rounded-lg font-semibold" variant="outline">
-                            Closed
-                          </Button>
-                        )}
+                          {status === "ongoing" && (
+                            <Button
+                              onClick={() => handleStart(s.subject)}
+                              disabled={busy === s.subject}
+                              className="w-full bg-green-600 hover:bg-green-700 text-white shadow-none rounded-lg font-semibold transition-colors duration-300"
+                            >
+                              {busy === s.subject ? "Opening…" : "▶ Ongoing"}
+                            </Button>
+                          )}
+                          {status === "pending" && (
+                            <div className="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white">
+                              <Clock className="w-4 h-4" />
+                              Pending
+                            </div>
+                          )}
+                          {status === "done" && (
+                            <div className="w-full flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white">
+                              <CheckCircle className="w-4 h-4" />
+                              Done
+                            </div>
+                          )}  
                       </CardContent>
                     </Card>
                   </motion.div>
