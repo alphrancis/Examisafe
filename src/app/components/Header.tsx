@@ -1,6 +1,6 @@
 import { GraduationCap } from "lucide-react";
 import { Link } from "react-router";
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 
 export default function Header() {
   return (

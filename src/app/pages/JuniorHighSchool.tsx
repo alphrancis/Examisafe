@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { ArrowLeft, FileText, Info } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, type Variants } from "framer-motion";
 
 export default function JuniorHighSchool() {
   const navigate = useNavigate();
@@ -24,10 +24,15 @@ export default function JuniorHighSchool() {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 15 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" } }
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }
+    }
   };
+
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
@@ -95,7 +100,7 @@ export default function JuniorHighSchool() {
                 <Info className="w-6 h-6 text-blue-600 shrink-0 mt-0.5" />
                 <p className="text-sm text-slate-700 leading-relaxed">
                   <strong className="text-slate-900 block mb-1">Important Instructions:</strong> 
-                  Please ensure you have your student ID and examination materials ready before proceeding to your specific grade portal. Read all instructions on the following page carefully before initiating any timed test.
+                  Read all instructions on the following page carefully before initiating any timed test.
                 </p>
               </CardContent>
             </Card>

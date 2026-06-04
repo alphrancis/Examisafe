@@ -33,4 +33,16 @@ export default defineConfig({
 
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],
+
+  server: {
+    watch: {
+      // Don't watch/scan the serverless functions — they use firebase-admin
+      // which is server-only and breaks Vite's browser bundling.
+      ignored: ['**/api/**'],
+    },
+  },
+  optimizeDeps: {
+    // Never try to pre-bundle the server-only package for the browser.
+    exclude: ['firebase-admin'],
+  },
 })

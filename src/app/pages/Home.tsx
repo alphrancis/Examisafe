@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { BookOpen, Users, ChevronRight } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, type Variants } from "framer-motion";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -17,9 +17,13 @@ export default function Home() {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 15 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" } }
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }
+    }
   };
 
   return (
@@ -93,12 +97,6 @@ export default function Home() {
             </motion.div>
           </div>
 
-          <motion.div variants={itemVariants} className="mt-16 text-center text-sm font-medium text-slate-500">
-            <p className="flex items-center justify-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-              System fully operational. Need assistance? Contact your examination coordinator.
-            </p>
-          </motion.div>
         </motion.div>
       </main>
       <Footer />
