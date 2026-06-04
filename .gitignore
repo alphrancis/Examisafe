@@ -1,22 +1,18 @@
-# Dependencies
+
 node_modules/
 .pnpm-store/
 
-# Build output
 dist/
 .vercel/
 
-# Firebase service account key — NEVER commit this
 serviceAccount*.json
 firebase-service-account*.json
 *-firebase-adminsdk-*.json
 
-# Local env files
 .env
 .env.local
 .env*.local
 
-# Editor / OS
 .DS_Store
 *.log
 .idea/
