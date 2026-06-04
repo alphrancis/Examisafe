@@ -85,11 +85,6 @@
       "optional": true
     }
   },
-  "pnpm": {
-    "overrides": {
-      "vite": "6.3.5"
-    }
-  },
   "allowScripts": {
     "esbuild@0.25.12": true,
     "@tailwindcss/oxide@4.1.12": true
