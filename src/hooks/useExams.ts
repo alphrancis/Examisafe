@@ -2,15 +2,10 @@ import { useEffect, useState } from "react";
 
 export interface ExamSubject {
   subject: string;
-  start: string; // ISO string, e.g. "2026-06-03T09:00:00+08:00"
+  start: string;
   end: string;
 }
 
-/**
- * Fetches a grade's exam schedule ONCE, then caches it in sessionStorage.
- * A page refresh reads from cache — no extra network call.
- * The schedule never contains links.
- */
 export function useSchedule(grade: number) {
   const [subjects, setSubjects] = useState<ExamSubject[]>([]);
   const [level, setLevel] = useState<string | null>(null);
@@ -25,21 +20,24 @@ export function useSchedule(grade: number) {
 
     const cacheKey = `schedule_grade_${grade}`;
 
-    // 1. Refresh hits cache first — no network call.
+
     const cached = sessionStorage.getItem(cacheKey);
     if (cached) {
       try {
         const parsed = JSON.parse(cached);
-        setSubjects(parsed.subjects);
+
+        const subjects = (parsed.subjects as ExamSubject[]).filter(
+          (s) => s.start != null && s.end != null
+        );
+        setSubjects(subjects);
         setLevel(parsed.level ?? null);
         setLoading(false);
         return;
       } catch {
-        sessionStorage.removeItem(cacheKey); // corrupted -> refetch
+        sessionStorage.removeItem(cacheKey);
       }
     }
 
-    // 2. No cache -> fetch once, then store.
     let cancelled = false;
     (async () => {
       try {
@@ -48,11 +46,17 @@ export function useSchedule(grade: number) {
         if (!res.ok) throw new Error("Failed to load");
         const data = await res.json();
         if (cancelled) return;
-        setSubjects(data.subjects);
+
+        const subjects = (data.subjects as ExamSubject[]).filter(
+          (s) => s.start != null && s.end != null
+        );
+
+        setSubjects(subjects);
         setLevel(data.level ?? null);
-        sessionStorage.setItem(cacheKey, JSON.stringify(data));
+
+        sessionStorage.setItem(cacheKey, JSON.stringify({ ...data, subjects }));
       } catch {
-        if (!cancelled) setError("Failed to load schedule.");
+        if (!cancelled) setError("Database Error");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -66,11 +70,7 @@ export function useSchedule(grade: number) {
   return { subjects, level, loading, error };
 }
 
-/**
- * Called ONLY when a student clicks "Start" on an open exam.
- * The server re-checks the time and returns the link only if open.
- * Throws with a readable message otherwise (e.g. "Exam is not currently open").
- */
+
 export async function getExamLink(
   grade: number,
   subject: string
