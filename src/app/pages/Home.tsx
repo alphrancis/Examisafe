@@ -45,7 +45,6 @@ export default function Home() {
               </h2>
               <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed transition-colors duration-300">
                 Select your educational level to access your examination materials. 
-                Please ensure you have your verified student ID ready before proceeding.
               </p>
             </motion.div>
 

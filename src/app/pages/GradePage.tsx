@@ -109,8 +109,7 @@ export default function GradePage() {
               Grade {grade} Examinations
             </h2>
             <p className="text-slate-500 dark:text-slate-400 text-base max-w-2xl leading-relaxed">
-              Select a subject below to begin your scheduled examination. Ensure you are
-              in a quiet environment before proceeding.
+              Select a subject below to begin your scheduled examination. 
             </p>
           </div>
 
