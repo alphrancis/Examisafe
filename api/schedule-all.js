@@ -1,3 +1,4 @@
+// pages/api/schedule-all.js
 import { db } from "./_firebase.js";
 
 let cache = null;
@@ -6,6 +7,12 @@ const TTL = 10 * 60 * 1000;
 
 export default async function handler(req, res) {
     const now = Date.now();
+
+    const { purge } = req.query;
+    if (purge === process.env.PURGE_SECRET) {
+        cache = null;
+        cacheTime = 0;
+    }
 
     if (cache && now - cacheTime < TTL) {
         res.setHeader("Cache-Control", "s-maxage=600, stale-while-revalidate=300");
