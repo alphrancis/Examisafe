@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     }
 
     if (cache && now - cacheTime < TTL) {
-        res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=60");
+        res.setHeader("Cache-Control", "no-store");
         return res.status(200).json(cache);
     }
 
@@ -24,7 +24,7 @@ export default async function handler(req, res) {
         cache = snap.exists ? snap.data() : {};
         cacheTime = now;
 
-        res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=60");
+        res.setHeader("Cache-Control", "no-store");
         return res.status(200).json(cache);
     } catch (err) {
         console.error("schedule-all error:", err);
