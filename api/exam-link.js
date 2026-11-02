@@ -1,28 +1,27 @@
-import { db } from "./_firebase.js";
+import { getExamsDoc } from "./exam-data.js";
 
 export default async function handler(req, res) {
+  res.setHeader("Cache-Control", "no-store");
+
   const { grade, subject } = req.query;
   if (!grade || !subject)
     return res.status(400).json({ error: "Missing grade or subject" });
 
   try {
-    const snap = await db.collection("exams").doc("all").get();
-    if (!snap.exists) return res.status(404).json({ error: "Not found" });
+    // Uses the CDN-cached doc (no Firestore read per click).
+    const data = await getExamsDoc(req);
 
-    const gradeData = (snap.data().grades || {})[`Grade ${grade}`];
+    const gradeData = (data.grades || {})[`Grade ${grade}`];
     const found = gradeData?.subjects?.find((s) => s.subject === subject);
     if (!found) return res.status(404).json({ error: "Subject not found" });
 
     if (!found.start || !found.end) {
-      res.setHeader("Cache-Control", "no-store");
       return res.status(403).json({ error: "Exam is not currently open" });
     }
 
+    // The open/closed check always uses the current time; only the data is cached.
     const now = new Date();
     const isOpen = now >= new Date(found.start) && now <= new Date(found.end);
-
-    res.setHeader("Cache-Control", "no-store");
-
     if (!isOpen) {
       return res.status(403).json({ error: "Exam is not currently open" });
     }

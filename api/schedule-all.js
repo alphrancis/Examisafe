@@ -1,34 +1,28 @@
-// pages/api/schedule-all.js
-import { db } from "./_firebase.js";
-
-let cache = null;
-let cacheTime = 0;
-const TTL = 10 * 60 * 1000;
+// Public schedule (no exam links). Served from Vercel's CDN cache.
+import { getExamsDoc, CACHE_SECONDS } from "./exam-data.js";
 
 export default async function handler(req, res) {
-    const now = Date.now();
+  try {
+    const data = await getExamsDoc(req);
 
-    const { purge } = req.query;
-    if (purge === process.env.PURGE_SECRET) {
-        cache = null;
-        cacheTime = 0;
+    // Strip links so students can't grab them before the exam opens.
+    const grades = {};
+    for (const [name, g] of Object.entries(data.grades || {})) {
+      grades[name] = {
+        ...g,
+        subjects: (g.subjects || []).map(({ link, ...rest }) => rest),
+      };
     }
 
-    if (cache && now - cacheTime < TTL) {
-        res.setHeader("Cache-Control", "no-store");
-        return res.status(200).json(cache);
-    }
-
-    try {
-        const snap = await db.collection("exams").doc("all").get();
-        cache = snap.exists ? snap.data() : {};
-        cacheTime = now;
-
-        res.setHeader("Cache-Control", "no-store");
-        return res.status(200).json(cache);
-    } catch (err) {
-        console.error("schedule-all error:", err);
-        if (cache) return res.status(200).json(cache);
-        return res.status(500).json({ error: "Server error" });
-    }
+    res.setHeader(
+      "Vercel-CDN-Cache-Control",
+      `s-maxage=${CACHE_SECONDS}, stale-while-revalidate=${CACHE_SECONDS * 2}`
+    );
+    res.setHeader("Cache-Control", "no-store");
+    return res.status(200).json({ grades });
+  } catch (err) {
+    console.error("schedule-all error:", err);
+    res.setHeader("Cache-Control", "no-store");
+    return res.status(500).json({ error: "Server error" });
+  }
 }

@@ -18,44 +18,52 @@ export function useSchedule(grade: number) {
       return;
     }
 
-    const cacheKey = `schedule_grade_${grade}`;
+    let cancelled = false;
 
-    // Serve from sessionStorage if already loaded this session
-    const cached = sessionStorage.getItem(cacheKey);
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        setSubjects(parsed.subjects);
-        setLevel(parsed.level);
-        setLoading(false);
-        return;
-      } catch {
-        sessionStorage.removeItem(cacheKey);
-      }
-    }
+    // Hits the CDN-cached endpoint (not Firestore), so polling is cheap.
+    const load = () =>
+      fetch("/api/schedule-all")
+        .then((r) => {
+          if (!r.ok) throw new Error("Failed to load");
+          return r.json();
+        })
+        .then((data) => {
+          if (cancelled) return;
+          const gradeData = (data.grades || {})[`Grade ${grade}`];
+          const subjects: ExamSubject[] = (gradeData?.subjects || [])
+            .filter((s: ExamSubject) => s.start != null && s.end != null)
+            .map((s: ExamSubject) => ({
+              subject: s.subject,
+              start: s.start,
+              end: s.end,
+            }));
+          setSubjects(subjects);
+          setLevel(gradeData?.level ?? null);
+          setError(null);
+        })
+        .catch(() => {
+          if (!cancelled) setError("Database Error");
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
 
-    // Fetch from Vercel-cached endpoint
-    fetch("/api/schedule-all")
-      .then((r) => {
-        if (!r.ok) throw new Error("Failed to load");
-        return r.json();
-      })
-      .then((data) => {
-        const gradeData = (data.grades || {})[`Grade ${grade}`];
-        const subjects: ExamSubject[] = (gradeData?.subjects || [])
-          .filter((s: ExamSubject) => s.start != null && s.end != null)
-          .map((s: ExamSubject) => ({
-            subject: s.subject,
-            start: s.start,
-            end: s.end,
-          }));
-        const level: string | null = gradeData?.level ?? null;
-        setSubjects(subjects);
-        setLevel(level);
-        sessionStorage.setItem(cacheKey, JSON.stringify({ subjects, level }));
-      })
-      .catch(() => setError("Database Error"))
-      .finally(() => setLoading(false));
+    load();
+
+    // Re-check so teacher edits (e.g. changed exam time) reach open tabs.
+    const interval = setInterval(() => {
+      if (document.visibilityState === "visible") load();
+    }, 60_000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") load();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, [grade]);
 
   return { subjects, level, loading, error };
