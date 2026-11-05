@@ -64,10 +64,19 @@ export default function GradePage() {
 
   const handleStart = async (subject: string) => {
     setBusy(subject);
+    // Open the tab during the click itself: browsers (especially phones) block
+    // tabs opened after an await. It's pointed at the exam once the link arrives.
+    const tab = window.open("", "_blank");
     try {
       const link = await getExamLink(grade, subject);
-      window.open(link, "_blank", "noopener,noreferrer");
+      if (tab) {
+        tab.opener = null;
+        tab.location.href = link;
+      } else {
+        window.location.href = link;
+      }
     } catch (e) {
+      tab?.close();
       alert((e as Error).message);
     } finally {
       setBusy(null);

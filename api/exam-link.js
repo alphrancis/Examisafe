@@ -26,6 +26,10 @@ export default async function handler(req, res) {
       return res.status(403).json({ error: "Exam is not currently open" });
     }
 
+    if (!found.link) {
+      return res.status(404).json({ error: "This exam has no link yet. Please tell your teacher." });
+    }
+
     return res.status(200).json({ link: found.link });
   } catch (err) {
     console.error("exam-link error:", err);

@@ -31,8 +31,9 @@ export default async function handler(req, res) {
 // Helper used by the other API routes: goes through the CDN cache above
 // instead of hitting Firestore directly.
 export async function getExamsDoc(req) {
-  const proto = req.headers["x-forwarded-proto"] || "https";
-  const url = `${proto}://${req.headers.host}/api/exam-data?key=${encodeURIComponent(
+  const host = req.headers.host || "";
+  const proto = req.headers["x-forwarded-proto"] || (/^(localhost|127.0.0.1)(:|$)/.test(host) ? "http" : "https");
+  const url = `${proto}://${host}/api/exam-data?key=${encodeURIComponent(
     process.env.INTERNAL_KEY
   )}`;
   const r = await fetch(url);

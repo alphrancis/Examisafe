@@ -75,7 +75,7 @@ export default function JuniorHighSchool() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {grades.map(({ level, colorClasses }, i) => (
                 <motion.div key={level} variants={itemVariants} className="transform transition-transform duration-300 hover:-translate-y-2 will-change-transform">
-                  <Card className={`h-full border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-xl ${colorClasses.shadow} bg-white dark:bg-slate-800 overflow-hidden group transition-all duration-300`}>
+                  <Card className={`h-full border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-xl bg-white dark:bg-slate-800 overflow-hidden group transition-all duration-300`}>
                     <div className={`absolute top-0 left-0 w-full h-1 ${colorClasses.bar} transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300`}></div>
                     <CardHeader className="text-center pb-4 pt-8">
                       <div className={`mx-auto mb-4 w-16 h-16 ${colorClasses.light} dark:bg-opacity-10 dark:bg-slate-700 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
